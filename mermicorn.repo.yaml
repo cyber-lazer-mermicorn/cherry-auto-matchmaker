@@ -1,0 +1,34 @@
+schema_version: "1.0"
+
+id: cherry-auto-matchmaker
+display_name: Cherry Auto Matchmaker
+owner: cherry
+lane: automotive-commerce
+visibility: public
+status: foundation
+
+purpose:
+  problem: Demonstrate deal-finding and communication ability through complete vehicle sales packets.
+  audience:
+    - Cherry
+    - dealership-support roles
+    - portfolio reviewers
+
+shared_services:
+  boot: mermicorn-mega-boot
+  memory: mermicorn-memory
+  token_efficiency: mermicorn-token-saver
+  graphics: mermicorn-graphic-ai
+  commerce: mermicorn-commerce-ai
+
+privacy:
+  public:
+    - templates
+    - sanitized_case_studies
+  private:
+    - buyer_data
+    - credentials
+
+first_proof:
+  artifact: one-vehicle-sales-packet
+  status: planned
