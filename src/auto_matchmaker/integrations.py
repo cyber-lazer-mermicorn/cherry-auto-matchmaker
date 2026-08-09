@@ -34,7 +34,7 @@ class KBBIntegration:
     """Kelley Blue Book integration."""
     
     def __init__(self, api_key: str = ""):
-        self.api_key = api_key
+        self.api_key = api_key or os.environ.get("KBB_API_KEY", "")
         self.price_data: dict[str, dict] = {}
     
     def get_value(self, year: int, make: str, model: str,
@@ -74,7 +74,7 @@ class EdmundsIntegration:
     """Edmunds car research integration."""
     
     def __init__(self, api_key: str = ""):
-        self.api_key = api_key
+        self.api_key = api_key or os.environ.get("EDMUNDS_API_KEY", "")
     
     def get_reviews(self, year: int, make: str, model: str) -> dict[str, Any]:
         """Get car reviews."""
