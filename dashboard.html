@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Matchmaker — Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #0a0a0f; color: #e0e0e0; font-family: 'Inter', sans-serif; }
+        .cyan { color: #00d4ff; text-shadow: 0 0 10px #00d4ff; }
+        .card { background: #12121a; border: 1px solid #2a2a3a; border-radius: 12px; }
+    </style>
+</head>
+<body class="min-h-screen p-6">
+    <div class="max-w-6xl mx-auto">
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-3xl font-bold cyan">Auto Matchmaker</h1>
+                <p class="text-gray-400">Identify → Assess → Value → Match</p>
+            </div>
+            <div>
+                <input id="api-key" type="password" placeholder="API Key" class="bg-gray-800 border border-gray-600 rounded px-3 py-2 text-sm mr-2">
+                <button onclick="loadDashboard()" class="bg-cyan-600 hover:bg-cyan-700 rounded px-4 py-2 text-sm">Connect</button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-4 gap-4 mb-8">
+            <div class="card p-4 text-center"><div class="text-2xl font-bold text-cyan-400" id="stat-vehicles">0</div><div class="text-gray-400 text-sm">Vehicles</div></div>
+            <div class="card p-4 text-center"><div class="text-2xl font-bold text-green-400" id="stat-value">$0</div><div class="text-gray-400 text-sm">Avg Value</div></div>
+            <div class="card p-4 text-center"><div class="text-2xl font-bold text-purple-400" id="stat-matches">0</div><div class="text-gray-400 text-sm">Matches</div></div>
+            <div class="card p-4 text-center"><div class="text-2xl font-bold text-yellow-400" id="stat-maintenance">0</div><div class="text-gray-400 text-sm">Service Due</div></div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-6">
+            <div class="card p-6">
+                <h2 class="text-xl font-bold mb-4">Add Vehicle</h2>
+                <div class="grid grid-cols-3 gap-3 mb-3">
+                    <input id="v-year" type="number" placeholder="Year" class="bg-gray-800 border border-gray-600 rounded px-3 py-2">
+                    <input id="v-make" type="text" placeholder="Make" class="bg-gray-800 border border-gray-600 rounded px-3 py-2">
+                    <input id="v-model" type="text" placeholder="Model" class="bg-gray-800 border border-gray-600 rounded px-3 py-2">
+                </div>
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <input id="v-price" type="number" placeholder="Price" class="bg-gray-800 border border-gray-600 rounded px-3 py-2">
+                    <input id="v-mileage" type="number" placeholder="Mileage" class="bg-gray-800 border border-gray-600 rounded px-3 py-2">
+                </div>
+                <button onclick="addVehicle()" class="bg-cyan-600 hover:bg-cyan-700 rounded px-6 py-2 w-full">Add Vehicle</button>
+                <div id="vehicles-list" class="mt-4 space-y-2 max-h-64 overflow-auto"></div>
+            </div>
+
+            <div class="card p-6">
+                <h2 class="text-xl font-bold mb-4">KBB Valuation</h2>
+                <div class="bg-gray-800 p-4 rounded">
+                    <div class="grid grid-cols-3 gap-3 mb-3">
+                        <input id="kbb-year" type="number" placeholder="Year" class="bg-gray-900 border border-gray-600 rounded px-3 py-2">
+                        <input id="kbb-make" type="text" placeholder="Make" class="bg-gray-900 border border-gray-600 rounded px-3 py-2">
+                        <input id="kbb-model" type="text" placeholder="Model" class="bg-gray-900 border border-gray-600 rounded px-3 py-2">
+                    </div>
+                    <input id="kbb-mileage" type="number" placeholder="Mileage" class="w-full bg-gray-900 border border-gray-600 rounded px-3 py-2 mb-3">
+                    <button onclick="getKBB()" class="bg-green-600 rounded px-4 py-2 text-sm w-full">Get KBB Value</button>
+                </div>
+                <div id="kbb-result" class="mt-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let apiKey = '';
+        
+        async function api(method, path, body = null) {
+            const opts = { method, headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey } };
+            if (body) opts.body = JSON.stringify(body);
+            const res = await fetch('/api' + path, opts);
+            return res.json();
+        }
+        
+        async function loadDashboard() {
+            apiKey = document.getElementById('api-key').value;
+            const data = await api('GET', '/vehicles');
+            const vehicles = data.vehicles || [];
+            document.getElementById('stat-vehicles').textContent = vehicles.length;
+            document.getElementById('vehicles-list').innerHTML = vehicles.map(v => 
+                `<div class="bg-gray-800 p-3 rounded flex justify-between"><span>${v.year} ${v.make} ${v.model}</span><span class="text-cyan-400">$${v.price?.toLocaleString()}</span></div>`
+            ).join('');
+        }
+        
+        async function addVehicle() {
+            const year = parseInt(document.getElementById('v-year').value);
+            const make = document.getElementById('v-make').value;
+            const model = document.getElementById('v-model').value;
+            const price = parseFloat(document.getElementById('v-price').value);
+            const mileage = parseInt(document.getElementById('v-mileage').value);
+            await api('POST', '/vehicles', { year, make, model, price, mileage });
+            loadDashboard();
+        }
+        
+        function getKBB() {
+            const year = document.getElementById('kbb-year').value;
+            const make = document.getElementById('kbb-make').value;
+            const model = document.getElementById('kbb-model').value;
+            document.getElementById('kbb-result').innerHTML = 
+                `<div class="bg-gray-800 p-4 rounded"><div class="text-gray-400">KBB Value for ${year} ${make} ${model}</div><div class="text-cyan-400 text-2xl font-bold mt-2">Loading...</div></div>`;
+            setTimeout(() => {
+                document.getElementById('kbb-result').innerHTML = 
+                    `<div class="bg-gray-800 p-4 rounded"><div class="text-gray-400">${year} ${make} ${model}</div><div class="text-cyan-400 text-2xl font-bold mt-2">Connect KBB API for live values</div></div>`;
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
