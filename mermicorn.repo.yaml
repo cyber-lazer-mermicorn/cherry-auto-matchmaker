@@ -3,7 +3,7 @@ schema_version: "1.0"
 id: cherry-auto-matchmaker
 display_name: Cherry Auto Matchmaker
 owner: cherry
-lane: automotive-commerce
+lane: commerce
 visibility: public
 status: foundation
 
